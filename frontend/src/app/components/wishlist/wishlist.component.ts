@@ -49,8 +49,7 @@ export class WishlistComponent implements OnInit {
   loadWishlist(): void {
     this.isLoading = true;
     this.wishlistService.getWishlist().subscribe({
-      next: (products) => {
-        this.wishlist = products;
+      next: () => {
         this.isLoading = false;
       },
       error: () => {

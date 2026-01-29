@@ -14,14 +14,24 @@ export class WishlistService {
 
   constructor(private http: HttpClient) {}
 
-  getWishlist(): Observable<any> {
+  getWishlist(): Observable<Product[]> {
     return this.http.get<any>(this.API_URL).pipe(
       tap(response => {
         const products = response.items.map((item: any) => ({
           id: item.productId,
+          productId: item.productId,
           name: item.productName,
+          description: item.description,
           price: item.price,
-          averageRating: item.rating
+          originalPrice: item.originalPrice,
+          averageRating: item.rating,
+          rating: item.rating,
+          imageUrl: item.imageUrl,
+          stockQuantity: item.stockQuantity,
+          stock: item.stockQuantity,
+          category: item.categoryName ? { name: item.categoryName } : null,
+          discountPercent: item.discountPercent,
+          premiumEarlyAccess: item.premiumEarlyAccess
         }));
         this.wishlistSubject.next(products);
       })
