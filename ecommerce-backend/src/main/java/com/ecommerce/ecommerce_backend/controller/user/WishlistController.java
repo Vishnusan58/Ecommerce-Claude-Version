@@ -59,11 +59,19 @@ public class WishlistController {
         List<WishlistItemDTO> items = wishlistService.getWishlist(user)
                 .stream()
                 .map(w -> {
+                    Product product = w.getProduct();
                     WishlistItemDTO dto = new WishlistItemDTO();
-                    dto.setProductId(w.getProduct().getId());
-                    dto.setProductName(w.getProduct().getName());
-                    dto.setPrice(w.getProduct().getPrice());
-                    dto.setRating(w.getProduct().getAverageRating());
+                    dto.setProductId(product.getId());
+                    dto.setProductName(product.getName());
+                    dto.setDescription(product.getDescription());
+                    dto.setPrice(product.getPrice());
+                    dto.setOriginalPrice(product.getOriginalPrice());
+                    dto.setRating(product.getAverageRating());
+                    dto.setImageUrl(product.getImageUrl());
+                    dto.setStockQuantity(product.getStockQuantity());
+                    dto.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
+                    dto.setDiscountPercent(product.getDiscountPercent());
+                    dto.setPremiumEarlyAccess(product.getPremiumEarlyAccess());
                     return dto;
                 }).collect(Collectors.toList());
 

@@ -10,5 +10,7 @@ public interface PremiumSubscriptionRepository extends JpaRepository<PremiumSubs
 
     Optional<PremiumSubscription> findByUser(User user);
 
+    Optional<PremiumSubscription> findByUserAndActiveTrue(User user);
+
     boolean existsByUserAndActiveTrue(User user);
 }
