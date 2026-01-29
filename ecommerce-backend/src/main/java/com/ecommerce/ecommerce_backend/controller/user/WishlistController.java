@@ -65,13 +65,21 @@ public class WishlistController {
                     dto.setProductName(product.getName());
                     dto.setDescription(product.getDescription());
                     dto.setPrice(product.getPrice());
-                    dto.setOriginalPrice(product.getOriginalPrice());
+
+                    // Calculate original price from discount
+                    if (product.getDiscountPercent() > 0) {
+                        double originalPrice = product.getPrice() / (1 - product.getDiscountPercent() / 100);
+                        dto.setOriginalPrice(originalPrice);
+                    } else {
+                        dto.setOriginalPrice(null);
+                    }
+
                     dto.setRating(product.getAverageRating());
                     dto.setImageUrl(product.getImageUrl());
                     dto.setStockQuantity(product.getStockQuantity());
                     dto.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
                     dto.setDiscountPercent(product.getDiscountPercent());
-                    dto.setPremiumEarlyAccess(product.getPremiumEarlyAccess());
+                    dto.setPremiumEarlyAccess(false); // Default to false as field doesn't exist in Product model
                     return dto;
                 }).collect(Collectors.toList());
 
