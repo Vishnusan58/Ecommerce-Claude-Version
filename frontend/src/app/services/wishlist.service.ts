@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { Product } from '../models/product.model';
+
+interface WishlistResponse {
+  items: any[];
+}
 
 @Injectable({
   providedIn: 'root'
@@ -15,8 +19,8 @@ export class WishlistService {
   constructor(private http: HttpClient) {}
 
   getWishlist(): Observable<Product[]> {
-    return this.http.get<any>(this.API_URL).pipe(
-      tap(response => {
+    return this.http.get<WishlistResponse>(this.API_URL).pipe(
+      map(response => {
         const products = response.items.map((item: any) => ({
           id: item.productId,
           productId: item.productId,
@@ -34,6 +38,7 @@ export class WishlistService {
           premiumEarlyAccess: item.premiumEarlyAccess
         }));
         this.wishlistSubject.next(products);
+        return products;
       })
     );
   }
