@@ -44,10 +44,9 @@ export type PaymentMethod = 'UPI' | 'CARD' | 'COD';
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
 
 export interface CreateOrderRequest {
-  shippingAddress: Address;
-  paymentMethod: PaymentMethod;
-  paymentDetails?: PaymentDetails;
+  addressId: number;
   couponCode?: string;
+  preferredDeliveryDate?: string;
 }
 
 export interface PaymentDetails {

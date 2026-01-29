@@ -16,8 +16,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
+import { AddressService } from '../../services/address.service';
 import { Cart, CartItem } from '../../models/cart.model';
-import { CreateOrderRequest, PaymentMethod } from '../../models/order.model';
+import { CreateOrderRequest, PaymentMethod, Address } from '../../models/order.model';
 
 @Component({
   selector: 'app-checkout',
@@ -42,6 +43,7 @@ import { CreateOrderRequest, PaymentMethod } from '../../models/order.model';
 })
 export class CheckoutComponent implements OnInit {
   cart: Cart | null = null;
+  addresses: any[] = [];
   isLoading = true;
   isPlacingOrder = false;
 
@@ -53,17 +55,12 @@ export class CheckoutComponent implements OnInit {
     private cartService: CartService,
     private orderService: OrderService,
     private authService: AuthService,
+    private addressService: AddressService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {
     this.addressForm = this.fb.group({
-      fullName: ['', [Validators.required]],
-      phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
-      street: ['', [Validators.required]],
-      city: ['', [Validators.required]],
-      state: ['', [Validators.required]],
-      zipCode: ['', [Validators.required, Validators.pattern('^[0-9]{6}$')]],
-      country: ['India', [Validators.required]]
+      addressId: ['', [Validators.required]]
     });
 
     this.paymentForm = this.fb.group({
@@ -82,6 +79,7 @@ export class CheckoutComponent implements OnInit {
       return;
     }
     this.loadCart();
+    this.loadAddresses();
   }
 
   loadCart(): void {
@@ -100,6 +98,20 @@ export class CheckoutComponent implements OnInit {
         this.isLoading = false;
         this.snackBar.open('Failed to load cart', 'Close', { duration: 3000 });
         this.router.navigate(['/cart']);
+      }
+    });
+  }
+
+  loadAddresses(): void {
+    this.addressService.getAddresses().subscribe({
+      next: (addresses) => {
+        this.addresses = addresses;
+        if (addresses.length > 0) {
+          this.addressForm.patchValue({ addressId: addresses[0].id });
+        }
+      },
+      error: () => {
+        this.snackBar.open('Failed to load addresses', 'Close', { duration: 3000 });
       }
     });
   }
@@ -131,43 +143,35 @@ export class CheckoutComponent implements OnInit {
   }
 
   placeOrder(): void {
-    if (this.addressForm.invalid || this.paymentForm.invalid) {
-      this.snackBar.open('Please fill all required fields', 'Close', { duration: 3000 });
+    if (this.addressForm.invalid) {
+      this.snackBar.open('Please select a delivery address', 'Close', { duration: 3000 });
+      return;
+    }
+
+    if (this.addresses.length === 0) {
+      this.snackBar.open('Please add a delivery address first', 'Go to Profile', { duration: 5000 })
+        .onAction().subscribe(() => this.router.navigate(['/profile']));
       return;
     }
 
     this.isPlacingOrder = true;
 
     const orderData: CreateOrderRequest = {
-      shippingAddress: this.addressForm.value,
-      paymentMethod: this.paymentForm.get('paymentMethod')?.value as PaymentMethod,
+      addressId: this.addressForm.get('addressId')?.value,
       couponCode: this.cart?.appliedCoupon
     };
 
-    const paymentMethod = this.paymentForm.get('paymentMethod')?.value;
-    if (paymentMethod === 'UPI') {
-      orderData.paymentDetails = {
-        upiId: this.paymentForm.get('upiId')?.value
-      };
-    } else if (paymentMethod === 'CARD') {
-      orderData.paymentDetails = {
-        cardNumber: this.paymentForm.get('cardNumber')?.value,
-        cardExpiry: this.paymentForm.get('cardExpiry')?.value,
-        cardCvv: this.paymentForm.get('cardCvv')?.value,
-        cardHolder: this.paymentForm.get('cardHolder')?.value
-      };
-    }
-
     this.orderService.placeOrder(orderData).subscribe({
       next: (order) => {
-        this.cartService.clearCart();
+        this.isPlacingOrder = false;
+        this.cartService.clearCart().subscribe();
         this.snackBar.open('Order placed successfully!', 'View Order', { duration: 5000 })
-          .onAction().subscribe(() => this.router.navigate(['/orders', order.id]));
-        this.router.navigate(['/orders', order.id]);
+          .onAction().subscribe(() => this.router.navigate(['/orders', order.orderId]));
+        this.router.navigate(['/orders', order.orderId]);
       },
       error: (error) => {
         this.isPlacingOrder = false;
-        const message = error.error?.message || 'Failed to place order';
+        const message = error.error?.message || 'Failed to place order. Please try again.';
         this.snackBar.open(message, 'Close', { duration: 5000 });
       }
     });
