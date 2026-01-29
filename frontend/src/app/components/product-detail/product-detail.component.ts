@@ -42,7 +42,7 @@ export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
   isLoading = true;
   quantity = 1;
-  selectedImage: string = '';
+  selectedImage = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -78,12 +78,36 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
+  getProductId(): number {
+    if (!this.product) return 0;
+    return this.product.id ?? this.product.productId ?? 0;
+  }
+
+  getProductStock(): number {
+    if (!this.product) return 0;
+    return this.product.stock ?? this.product.stockQuantity ?? 0;
+  }
+
+  getProductRating(): number {
+    if (!this.product) return 0;
+    return this.product.rating ?? this.product.averageRating ?? 0;
+  }
+
+  getProductCategory(): string {
+    return this.product?.category?.name ?? 'Uncategorized';
+  }
+
+  getReviewCount(): number {
+    return this.product?.reviewCount ?? 0;
+  }
+
   selectImage(imageUrl: string): void {
     this.selectedImage = imageUrl;
   }
 
   incrementQuantity(): void {
-    if (this.product && this.quantity < this.product.stock) {
+    const stock = this.getProductStock();
+    if (this.quantity < stock) {
       this.quantity++;
     }
   }
@@ -101,8 +125,9 @@ export class ProductDetailComponent implements OnInit {
       return;
     }
 
-    if (this.product) {
-      this.cartService.addToCart(this.product.id, this.quantity).subscribe({
+    const productId = this.getProductId();
+    if (productId) {
+      this.cartService.addToCart(productId, this.quantity).subscribe({
         next: () => {
           this.snackBar.open(`Added ${this.quantity} item(s) to cart!`, 'View Cart', { duration: 3000 })
             .onAction().subscribe(() => this.router.navigate(['/cart']));
@@ -121,13 +146,14 @@ export class ProductDetailComponent implements OnInit {
       return;
     }
 
-    if (this.product) {
+    const productId = this.getProductId();
+    if (productId) {
       if (this.isInWishlist) {
-        this.wishlistService.removeFromWishlist(this.product.id).subscribe({
+        this.wishlistService.removeFromWishlist(productId).subscribe({
           next: () => this.snackBar.open('Removed from wishlist', 'Close', { duration: 2000 })
         });
       } else {
-        this.wishlistService.addToWishlist(this.product.id).subscribe({
+        this.wishlistService.addToWishlist(productId).subscribe({
           next: () => this.snackBar.open('Added to wishlist!', 'Close', { duration: 2000 })
         });
       }
@@ -135,11 +161,16 @@ export class ProductDetailComponent implements OnInit {
   }
 
   get isInWishlist(): boolean {
-    return this.product ? this.wishlistService.isInWishlist(this.product.id) : false;
+    const productId = this.getProductId();
+    return productId ? this.wishlistService.isInWishlist(productId) : false;
   }
 
   get discountPercent(): number {
-    if (this.product?.originalPrice && this.product.originalPrice > this.product.price) {
+    if (!this.product) return 0;
+    if (this.product.discountPercent) {
+      return Math.round(this.product.discountPercent);
+    }
+    if (this.product.originalPrice && this.product.originalPrice > this.product.price) {
       return Math.round((1 - this.product.price / this.product.originalPrice) * 100);
     }
     return 0;

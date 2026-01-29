@@ -71,19 +71,11 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.cartService.clearCart();
-        this.snackBar.open('Logged out successfully', 'Close', {
-          duration: 3000
-        });
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        // Still clear local state even if API call fails
-        this.cartService.clearCart();
-        this.router.navigate(['/login']);
-      }
+    this.authService.logout();
+    this.cartService.clearCart();
+    this.snackBar.open('Logged out successfully', 'Close', {
+      duration: 3000
     });
+    this.router.navigate(['/login']);
   }
 }

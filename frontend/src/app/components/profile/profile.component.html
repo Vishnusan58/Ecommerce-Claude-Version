@@ -120,8 +120,8 @@
               </div>
             } @else {
               <div class="recently-viewed-grid">
-                @for (product of recentlyViewed; track product.id) {
-                  <mat-card class="product-mini-card" (click)="viewProduct(product.id)">
+                @for (product of recentlyViewed; track getProductId(product)) {
+                  <mat-card class="product-mini-card" (click)="viewProduct(getProductId(product))">
                     <img [src]="product.imageUrl" [alt]="product.name">
                     <div class="product-info">
                       <h4>{{ product.name }}</h4>

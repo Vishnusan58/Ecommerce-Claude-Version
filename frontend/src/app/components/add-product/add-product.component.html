@@ -73,8 +73,10 @@
           @if (isLoading) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {
-            <mat-icon>add</mat-icon>
-            Add Product
+            <ng-container>
+              <mat-icon>add</mat-icon>
+              Add Product
+            </ng-container>
           }
         </button>
       </div>

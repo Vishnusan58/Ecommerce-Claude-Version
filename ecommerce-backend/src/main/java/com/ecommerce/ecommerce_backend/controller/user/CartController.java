@@ -24,12 +24,15 @@ public class CartController {
     }
 
     @PostMapping("/add")
-    public void addToCart(
+    public CartResponseDTO addToCart(
             @RequestHeader("X-USER-ID") Long userId,
             @RequestBody AddToCartDTO dto) {
 
         User user = authService.getUserById(userId);
         cartService.addItem(user, dto.getProductId(), dto.getQuantity());
+
+        // Return updated cart
+        return viewCart(userId);
     }
 
     @GetMapping
@@ -45,6 +48,8 @@ public class CartController {
             dto.setCartItemId(item.getId());
             dto.setProductId(item.getProduct().getId());
             dto.setProductName(item.getProduct().getName());
+            dto.setImageUrl(item.getProduct().getImageUrl());
+            dto.setBrand(item.getProduct().getBrand());
             dto.setPrice(item.getProduct().getPrice());
             dto.setQuantity(item.getQuantity());
             dto.setSubtotal(item.getQuantity() * item.getProduct().getPrice());
@@ -68,5 +73,30 @@ public class CartController {
 
         User user = authService.getUserById(userId);
         cartService.clearCart(user);
+    }
+
+    @PutMapping("/{cartItemId}")
+    public CartResponseDTO updateItemQuantity(
+            @RequestHeader("X-USER-ID") Long userId,
+            @PathVariable Long cartItemId,
+            @RequestBody UpdateCartItemDTO dto) {
+
+        User user = authService.getUserById(userId);
+        cartService.updateItemQuantity(user, cartItemId, dto.getQuantity());
+
+        // Return updated cart
+        return viewCart(userId);
+    }
+
+    @DeleteMapping("/{cartItemId}")
+    public CartResponseDTO removeItem(
+            @RequestHeader("X-USER-ID") Long userId,
+            @PathVariable Long cartItemId) {
+
+        User user = authService.getUserById(userId);
+        cartService.removeItem(user, cartItemId);
+
+        // Return updated cart
+        return viewCart(userId);
     }
 }

@@ -13,6 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { Cart, CartItem } from '../../models/cart.model';
+import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-cart',
@@ -68,14 +69,67 @@ export class CartComponent implements OnInit {
     });
   }
 
+  getProductStock(item: CartItem): number {
+    if (item.product) {
+      return item.product.stock ?? item.product.stockQuantity ?? 999;
+    }
+    return 999; // Default when no product info
+  }
+
+  getProductId(item: CartItem): number | undefined {
+    return item.product?.id ?? item.product?.productId ?? item.productId;
+  }
+
+  getItemId(item: CartItem): number {
+    return item.id ?? item.cartItemId ?? 0;
+  }
+
+  getItemName(item: CartItem): string {
+    return item.product?.name ?? item.productName ?? 'Unknown';
+  }
+
+  getItemImage(item: CartItem): string {
+    return item.product?.imageUrl ?? item.imageUrl ?? '';
+  }
+
+  getItemBrand(item: CartItem): string {
+    return item.product?.brand ?? item.brand ?? '';
+  }
+
+  getItemPrice(item: CartItem): number {
+    return item.product?.price ?? item.price ?? 0;
+  }
+
+  getCartSubtotal(): number {
+    return this.cart?.subtotal ?? this.cart?.totalAmount ?? 0;
+  }
+
+  getCartTax(): number {
+    return this.cart?.tax ?? 0;
+  }
+
+  getCartDeliveryFee(): number {
+    return this.cart?.deliveryFee ?? 0;
+  }
+
+  getCartDiscount(): number {
+    return this.cart?.discount ?? this.cart?.discountAmount ?? 0;
+  }
+
+  getCartTotal(): number {
+    return this.cart?.total ?? this.cart?.finalAmount ?? 0;
+  }
+
   updateQuantity(item: CartItem, newQuantity: number): void {
     if (newQuantity < 1) return;
-    if (newQuantity > item.product.stock) {
-      this.snackBar.open(`Only ${item.product.stock} items available`, 'Close', { duration: 2000 });
+    const stock = this.getProductStock(item);
+    if (newQuantity > stock) {
+      this.snackBar.open(`Only ${stock} items available`, 'Close', { duration: 2000 });
       return;
     }
 
-    this.cartService.updateQuantity(item.id, newQuantity).subscribe({
+    const itemId = this.getItemId(item);
+    this.cartService.updateQuantity(itemId, newQuantity).subscribe({
       next: (cart) => {
         this.cart = cart;
       },
@@ -86,7 +140,8 @@ export class CartComponent implements OnInit {
   }
 
   removeItem(item: CartItem): void {
-    this.cartService.removeFromCart(item.id).subscribe({
+    const itemId = this.getItemId(item);
+    this.cartService.removeFromCart(itemId).subscribe({
       next: (cart) => {
         this.cart = cart;
         this.snackBar.open('Item removed from cart', 'Close', { duration: 2000 });
@@ -129,8 +184,10 @@ export class CartComponent implements OnInit {
     this.router.navigate(['/checkout']);
   }
 
-  viewProduct(productId: number): void {
-    this.router.navigate(['/products', productId]);
+  viewProduct(productId: number | undefined): void {
+    if (productId != null) {
+      this.router.navigate(['/products', productId]);
+    }
   }
 
   get isPremium(): boolean {

@@ -18,19 +18,19 @@
       <div class="compare-row header-row">
         <div class="compare-label"></div>
         <div class="compare-cell">
-          <img [src]="product1.imageUrl" [alt]="product1.name" (click)="viewProduct(product1.id)">
-          <h3 (click)="viewProduct(product1.id)">{{ product1.name }}</h3>
-          <button mat-raised-button color="primary" (click)="addToCart(product1)" [disabled]="product1.stock === 0">
+          <img [src]="product1.imageUrl" [alt]="product1.name" (click)="viewProduct(getProductId(product1))">
+          <h3 (click)="viewProduct(getProductId(product1))">{{ product1.name }}</h3>
+          <button mat-raised-button color="primary" (click)="addToCart(product1)" [disabled]="getProductStock(product1) === 0">
             <mat-icon>add_shopping_cart</mat-icon>
-            {{ product1.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+            {{ getProductStock(product1) === 0 ? 'Out of Stock' : 'Add to Cart' }}
           </button>
         </div>
         <div class="compare-cell">
-          <img [src]="product2.imageUrl" [alt]="product2.name" (click)="viewProduct(product2.id)">
-          <h3 (click)="viewProduct(product2.id)">{{ product2.name }}</h3>
-          <button mat-raised-button color="primary" (click)="addToCart(product2)" [disabled]="product2.stock === 0">
+          <img [src]="product2.imageUrl" [alt]="product2.name" (click)="viewProduct(getProductId(product2))">
+          <h3 (click)="viewProduct(getProductId(product2))">{{ product2.name }}</h3>
+          <button mat-raised-button color="primary" (click)="addToCart(product2)" [disabled]="getProductStock(product2) === 0">
             <mat-icon>add_shopping_cart</mat-icon>
-            {{ product2.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+            {{ getProductStock(product2) === 0 ? 'Out of Stock' : 'Add to Cart' }}
           </button>
         </div>
       </div>
@@ -43,9 +43,9 @@
             @if (row.format === 'rating') {
               <div class="rating">
                 @for (star of [1,2,3,4,5]; track star) {
-                  <mat-icon>{{ star <= getValue(product1, row.key) ? 'star' : 'star_border' }}</mat-icon>
+                  <mat-icon>{{ star <= getProductRating(product1) ? 'star' : 'star_border' }}</mat-icon>
                 }
-                <span>({{ getValue(product1, 'reviewCount') }})</span>
+                <span>({{ getValue(product1, 'reviewCount') ?? 0 }})</span>
               </div>
             } @else {
               {{ formatValue(getValue(product1, row.key), row.format) }}
@@ -55,9 +55,9 @@
             @if (row.format === 'rating') {
               <div class="rating">
                 @for (star of [1,2,3,4,5]; track star) {
-                  <mat-icon>{{ star <= getValue(product2, row.key) ? 'star' : 'star_border' }}</mat-icon>
+                  <mat-icon>{{ star <= getProductRating(product2) ? 'star' : 'star_border' }}</mat-icon>
                 }
-                <span>({{ getValue(product2, 'reviewCount') }})</span>
+                <span>({{ getValue(product2, 'reviewCount') ?? 0 }})</span>
               </div>
             } @else {
               {{ formatValue(getValue(product2, row.key), row.format) }}

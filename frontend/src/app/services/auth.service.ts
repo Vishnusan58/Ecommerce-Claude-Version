@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { User, LoginRequest, RegisterRequest, AuthResponse } from '../models/user.model';
 
 @Injectable({
@@ -8,7 +8,6 @@ import { User, LoginRequest, RegisterRequest, AuthResponse } from '../models/use
 })
 export class AuthService {
   private readonly API_URL = '/api/auth';
-  private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'current_user';
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.getStoredUser());
@@ -16,31 +15,9 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(credentials: LoginRequest): Observable<AuthResponse> {
+  login(credentials: LoginRequest): Observable<User> {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials).pipe(
-      tap(response => {
-        this.storeToken(response.token);
-        this.storeUser(response.user);
-        this.currentUserSubject.next(response.user);
-      })
-    );
-  }
-
-  register(userData: RegisterRequest): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.API_URL}/register`, userData);
-  }
-
-  logout(): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.API_URL}/logout`, {}).pipe(
-      tap(() => {
-        this.clearStorage();
-        this.currentUserSubject.next(null);
-      })
-    );
-  }
-
-  getCurrentUser(): Observable<User> {
-    return this.http.get<User>(`${this.API_URL}/me`).pipe(
+      map(response => this.mapAuthResponseToUser(response, credentials.email)),
       tap(user => {
         this.storeUser(user);
         this.currentUserSubject.next(user);
@@ -48,12 +25,23 @@ export class AuthService {
     );
   }
 
-  isLoggedIn(): boolean {
-    return !!this.getToken();
+  register(userData: RegisterRequest): Observable<User> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, userData).pipe(
+      map(response => this.mapAuthResponseToUser(response, userData.email)),
+      tap(user => {
+        this.storeUser(user);
+        this.currentUserSubject.next(user);
+      })
+    );
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+  logout(): void {
+    this.clearStorage();
+    this.currentUserSubject.next(null);
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getStoredUser();
   }
 
   getCurrentUserValue(): User | null {
@@ -62,7 +50,7 @@ export class AuthService {
 
   hasRole(role: string): boolean {
     const user = this.getCurrentUserValue();
-    return user?.role === role;
+    return user?.role?.toUpperCase() === role.toUpperCase();
   }
 
   isPremium(): boolean {
@@ -70,8 +58,14 @@ export class AuthService {
     return user?.premiumStatus ?? false;
   }
 
-  private storeToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
+  private mapAuthResponseToUser(response: AuthResponse, email: string): User {
+    return {
+      id: response.userId,
+      email: email,
+      name: response.name,
+      role: response.role as User['role'],
+      premiumStatus: response.premium
+    };
   }
 
   private storeUser(user: User): void {
@@ -84,7 +78,6 @@ export class AuthService {
   }
 
   private clearStorage(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
   }
 }

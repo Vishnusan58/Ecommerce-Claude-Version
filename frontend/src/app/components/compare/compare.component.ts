@@ -81,53 +81,81 @@ export class CompareComponent implements OnInit {
     });
   }
 
-  getValue(product: Product, key: string): any {
+  getProductId(product: Product | null): number {
+    if (!product) return 0;
+    return product.id ?? product.productId ?? 0;
+  }
+
+  getProductStock(product: Product | null): number {
+    if (!product) return 0;
+    return product.stock ?? product.stockQuantity ?? 0;
+  }
+
+  getProductRating(product: Product | null): number {
+    if (!product) return 0;
+    return product.rating ?? product.averageRating ?? 0;
+  }
+
+  getValue(product: Product | null, key: string): any {
+    if (!product) return null;
     if (key === 'category') {
-      return product.category.name;
+      return product.category?.name ?? 'N/A';
     }
-    return (product as any)[key];
+    if (key === 'rating') {
+      return this.getProductRating(product);
+    }
+    if (key === 'stock') {
+      return this.getProductStock(product);
+    }
+    return (product as any)[key] ?? null;
   }
 
   formatValue(value: any, format: string): string {
+    if (value == null) return 'N/A';
     switch (format) {
       case 'currency':
-        return '₹' + value.toLocaleString();
+        return '₹' + (typeof value === 'number' ? value.toLocaleString() : value);
       case 'rating':
         return value + '/5';
       case 'number':
-        return value.toLocaleString();
+        return typeof value === 'number' ? value.toLocaleString() : String(value);
       case 'stock':
         return value > 0 ? `${value} in stock` : 'Out of stock';
       case 'boolean':
         return value ? 'Yes' : 'No';
       default:
-        return value;
+        return String(value ?? 'N/A');
     }
   }
 
   isBetter(key: string, val1: any, val2: any): 'product1' | 'product2' | 'equal' {
-    if (val1 === val2) return 'equal';
+    if (val1 == null || val2 == null || val1 === val2) return 'equal';
 
     switch (key) {
       case 'price':
-        return val1 < val2 ? 'product1' : 'product2'; // Lower is better
+        return val1 < val2 ? 'product1' : 'product2';
       case 'rating':
       case 'reviewCount':
       case 'stock':
-        return val1 > val2 ? 'product1' : 'product2'; // Higher is better
+        return val1 > val2 ? 'product1' : 'product2';
       default:
         return 'equal';
     }
   }
 
-  addToCart(product: Product): void {
+  addToCart(product: Product | null): void {
+    if (!product) return;
+
     if (!this.authService.isLoggedIn()) {
       this.snackBar.open('Please login to add items to cart', 'Login', { duration: 3000 })
         .onAction().subscribe(() => this.router.navigate(['/login']));
       return;
     }
 
-    this.cartService.addToCart(product.id).subscribe({
+    const productId = this.getProductId(product);
+    if (!productId) return;
+
+    this.cartService.addToCart(productId).subscribe({
       next: () => {
         this.snackBar.open('Added to cart!', 'View Cart', { duration: 3000 })
           .onAction().subscribe(() => this.router.navigate(['/cart']));
@@ -138,7 +166,9 @@ export class CompareComponent implements OnInit {
     });
   }
 
-  viewProduct(productId: number): void {
-    this.router.navigate(['/products', productId]);
+  viewProduct(productId: number | undefined): void {
+    if (productId != null && productId > 0) {
+      this.router.navigate(['/products', productId]);
+    }
   }
 }

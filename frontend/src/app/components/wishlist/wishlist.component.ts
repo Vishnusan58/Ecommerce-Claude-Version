@@ -64,10 +64,29 @@ export class WishlistComponent implements OnInit {
     });
   }
 
+  getProductId(product: Product): number {
+    return product.id ?? product.productId ?? 0;
+  }
+
+  getProductStock(product: Product): number {
+    return product.stock ?? product.stockQuantity ?? 0;
+  }
+
+  getProductRating(product: Product): number {
+    return product.rating ?? product.averageRating ?? 0;
+  }
+
+  getProductCategory(product: Product): string {
+    return product.category?.name ?? 'Uncategorized';
+  }
+
   moveToCart(product: Product): void {
-    this.cartService.addToCart(product.id).subscribe({
+    const productId = this.getProductId(product);
+    if (!productId) return;
+
+    this.cartService.addToCart(productId).subscribe({
       next: () => {
-        this.wishlistService.removeFromWishlist(product.id).subscribe();
+        this.wishlistService.removeFromWishlist(productId).subscribe();
         this.snackBar.open('Moved to cart!', 'View Cart', { duration: 3000 })
           .onAction().subscribe(() => this.router.navigate(['/cart']));
       },
@@ -78,18 +97,26 @@ export class WishlistComponent implements OnInit {
   }
 
   removeFromWishlist(product: Product): void {
-    this.wishlistService.removeFromWishlist(product.id).subscribe({
+    const productId = this.getProductId(product);
+    if (!productId) return;
+
+    this.wishlistService.removeFromWishlist(productId).subscribe({
       next: () => {
         this.snackBar.open('Removed from wishlist', 'Close', { duration: 2000 });
       }
     });
   }
 
-  viewProduct(productId: number): void {
-    this.router.navigate(['/products', productId]);
+  viewProduct(productId: number | undefined): void {
+    if (productId != null && productId > 0) {
+      this.router.navigate(['/products', productId]);
+    }
   }
 
   getDiscountPercent(product: Product): number {
+    if (product.discountPercent) {
+      return Math.round(product.discountPercent);
+    }
     if (product.originalPrice && product.originalPrice > product.price) {
       return Math.round((1 - product.price / product.originalPrice) * 100);
     }

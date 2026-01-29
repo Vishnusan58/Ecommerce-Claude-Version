@@ -141,7 +141,7 @@ export class ProductListComponent implements OnInit {
   }
 
   viewProduct(product: Product): void {
-    this.router.navigate(['/products', product.id]);
+    this.router.navigate(['/products', this.getProductId(product)]);
   }
 
   addToCart(product: Product, event: Event): void {
@@ -153,7 +153,7 @@ export class ProductListComponent implements OnInit {
       return;
     }
 
-    this.cartService.addToCart(product.id).subscribe({
+    this.cartService.addToCart(this.getProductId(product)).subscribe({
       next: () => {
         this.snackBar.open('Added to cart!', 'Close', { duration: 2000 });
       },
@@ -172,12 +172,13 @@ export class ProductListComponent implements OnInit {
       return;
     }
 
-    if (this.isInWishlist(product.id)) {
-      this.wishlistService.removeFromWishlist(product.id).subscribe({
+    const productId = this.getProductId(product);
+    if (this.isInWishlist(productId)) {
+      this.wishlistService.removeFromWishlist(productId).subscribe({
         next: () => this.snackBar.open('Removed from wishlist', 'Close', { duration: 2000 })
       });
     } else {
-      this.wishlistService.addToWishlist(product.id).subscribe({
+      this.wishlistService.addToWishlist(productId).subscribe({
         next: () => this.snackBar.open('Added to wishlist!', 'Close', { duration: 2000 })
       });
     }
@@ -192,7 +193,8 @@ export class ProductListComponent implements OnInit {
       event.stopPropagation();
     }
 
-    const index = this.compareList.findIndex(p => p.id === product.id);
+    const productId = this.getProductId(product);
+    const index = this.compareList.findIndex(p => this.getProductId(p) === productId);
     if (index > -1) {
       this.compareList.splice(index, 1);
     } else if (this.compareList.length < 2) {
@@ -203,31 +205,56 @@ export class ProductListComponent implements OnInit {
   }
 
   removeFromCompare(product: Product): void {
-    const index = this.compareList.findIndex(p => p.id === product.id);
+    const productId = this.getProductId(product);
+    const index = this.compareList.findIndex(p => this.getProductId(p) === productId);
     if (index > -1) {
       this.compareList.splice(index, 1);
     }
   }
 
   isInCompare(productId: number): boolean {
-    return this.compareList.some(p => p.id === productId);
+    return this.compareList.some(p => this.getProductId(p) === productId);
   }
 
   goToCompare(): void {
     if (this.compareList.length === 2) {
       this.router.navigate(['/compare'], {
         queryParams: {
-          id1: this.compareList[0].id,
-          id2: this.compareList[1].id
+          id1: this.getProductId(this.compareList[0]),
+          id2: this.getProductId(this.compareList[1])
         }
       });
     }
   }
 
   getDiscountPercent(product: Product): number {
+    if (product.discountPercent) {
+      return Math.round(product.discountPercent);
+    }
     if (product.originalPrice && product.originalPrice > product.price) {
       return Math.round((1 - product.price / product.originalPrice) * 100);
     }
     return 0;
+  }
+
+  // Helper methods to handle backend field name variations
+  getProductId(product: Product): number {
+    return product.id || product.productId || 0;
+  }
+
+  getProductStock(product: Product): number {
+    return product.stock ?? product.stockQuantity ?? 0;
+  }
+
+  getProductRating(product: Product): number {
+    return product.rating ?? product.averageRating ?? 0;
+  }
+
+  getProductCategory(product: Product): string {
+    return product.category?.name || 'Uncategorized';
+  }
+
+  getReviewCount(product: Product): number {
+    return product.reviewCount ?? 0;
   }
 }

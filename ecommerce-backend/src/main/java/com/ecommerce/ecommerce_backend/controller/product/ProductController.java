@@ -35,10 +35,12 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ProductResponseDTO getProductById(
             @PathVariable Long productId,
-            @RequestHeader("X-USER-ID") Long userId) {
+            @RequestHeader(value = "X-USER-ID", required = false) Long userId) {
 
-        // user fetched only for validation / future use
-        authService.getUserById(userId);
+        // user fetched only for validation / future use (optional for guest browsing)
+        if (userId != null) {
+            authService.getUserById(userId);
+        }
 
         Product product = productService.getProductById(productId);
         return mapToResponse(product);
@@ -93,6 +95,7 @@ public class ProductController {
         dto.setProductId(product.getId());
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
+        dto.setBrand(product.getBrand());
         dto.setPrice(product.getPrice());
         dto.setDiscountPercent(product.getDiscountPercent());
         dto.setStockQuantity(product.getStockQuantity());

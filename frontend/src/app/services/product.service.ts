@@ -18,17 +18,19 @@ export class ProductService {
     sort: string = 'createdAt,desc',
     filter?: ProductFilter
   ): Observable<PageResponse<Product>> {
+    const [sortBy, direction] = sort.split(',');
+
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
-      .set('sort', sort);
+      .set('sortBy', sortBy || 'createdAt')
+      .set('direction', direction || 'desc');
 
     if (filter) {
       if (filter.categoryId) params = params.set('categoryId', filter.categoryId.toString());
       if (filter.minPrice) params = params.set('minPrice', filter.minPrice.toString());
       if (filter.maxPrice) params = params.set('maxPrice', filter.maxPrice.toString());
-      if (filter.brand) params = params.set('brand', filter.brand);
-      if (filter.search) params = params.set('search', filter.search);
+      if (filter.search) params = params.set('keyword', filter.search);
     }
 
     return this.http.get<PageResponse<Product>>(this.API_URL, { params });

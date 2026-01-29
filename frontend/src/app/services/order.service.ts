@@ -8,7 +8,7 @@ import { PageResponse } from '../models/product.model';
   providedIn: 'root'
 })
 export class OrderService {
-  private readonly API_URL = '/api/orders';
+  private readonly API_URL = '/api/user/orders';
 
   constructor(private http: HttpClient) {}
 

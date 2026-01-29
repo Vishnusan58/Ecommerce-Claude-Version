@@ -7,7 +7,7 @@ import { Cart, AddToCartRequest } from '../models/cart.model';
   providedIn: 'root'
 })
 export class CartService {
-  private readonly API_URL = '/api/cart';
+  private readonly API_URL = '/api/user/cart';
 
   private cartItemCountSubject = new BehaviorSubject<number>(0);
   public cartItemCount$ = this.cartItemCountSubject.asObservable();
@@ -28,7 +28,7 @@ export class CartService {
 
   addToCart(productId: number, quantity: number = 1): Observable<Cart> {
     const request: AddToCartRequest = { productId, quantity };
-    return this.http.post<Cart>(this.API_URL, request).pipe(
+    return this.http.post<Cart>(`${this.API_URL}/add`, request).pipe(
       tap(cart => {
         this.cartSubject.next(cart);
         this.updateCartCount(cart);

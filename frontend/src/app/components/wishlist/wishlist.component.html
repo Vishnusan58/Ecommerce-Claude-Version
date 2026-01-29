@@ -20,7 +20,7 @@
 
   @if (!isLoading && wishlist.length > 0) {
     <div class="wishlist-grid">
-      @for (product of wishlist; track product.id) {
+      @for (product of wishlist; track getProductId(product)) {
         <mat-card class="wishlist-card">
           @if (product.premiumEarlyAccess) {
             <div class="premium-badge">Early Access</div>
@@ -29,15 +29,15 @@
             <div class="discount-badge">-{{ getDiscountPercent(product) }}%</div>
           }
 
-          <img mat-card-image [src]="product.imageUrl" [alt]="product.name" class="product-image" (click)="viewProduct(product.id)">
+          <img mat-card-image [src]="product.imageUrl" [alt]="product.name" class="product-image" (click)="viewProduct(getProductId(product))">
 
           <mat-card-content>
-            <p class="product-category">{{ product.category.name }}</p>
-            <h3 class="product-name" (click)="viewProduct(product.id)">{{ product.name }}</h3>
+            <p class="product-category">{{ getProductCategory(product) }}</p>
+            <h3 class="product-name" (click)="viewProduct(getProductId(product))">{{ product.name }}</h3>
 
             <div class="rating">
               @for (star of [1,2,3,4,5]; track star) {
-                <mat-icon>{{ star <= product.rating ? 'star' : 'star_border' }}</mat-icon>
+                <mat-icon>{{ star <= getProductRating(product) ? 'star' : 'star_border' }}</mat-icon>
               }
             </div>
 
@@ -48,13 +48,13 @@
               }
             </div>
 
-            <p class="stock-status" [class.out-of-stock]="product.stock === 0">
-              {{ product.stock > 0 ? 'In Stock' : 'Out of Stock' }}
+            <p class="stock-status" [class.out-of-stock]="getProductStock(product) === 0">
+              {{ getProductStock(product) > 0 ? 'In Stock' : 'Out of Stock' }}
             </p>
           </mat-card-content>
 
           <mat-card-actions>
-            <button mat-raised-button color="primary" (click)="moveToCart(product)" [disabled]="product.stock === 0">
+            <button mat-raised-button color="primary" (click)="moveToCart(product)" [disabled]="getProductStock(product) === 0">
               <mat-icon>add_shopping_cart</mat-icon>
               Move to Cart
             </button>

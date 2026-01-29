@@ -30,17 +30,19 @@
       <!-- Product Info -->
       <div class="info-section">
         <mat-chip-set>
-          <mat-chip>{{ product.category.name }}</mat-chip>
-          <mat-chip>{{ product.brand }}</mat-chip>
+          <mat-chip>{{ getProductCategory() }}</mat-chip>
+          @if (product.brand) {
+            <mat-chip>{{ product.brand }}</mat-chip>
+          }
         </mat-chip-set>
 
         <h1 class="product-name">{{ product.name }}</h1>
 
         <div class="rating">
           @for (star of [1,2,3,4,5]; track star) {
-            <mat-icon>{{ star <= product.rating ? 'star' : 'star_border' }}</mat-icon>
+            <mat-icon>{{ star <= getProductRating() ? 'star' : 'star_border' }}</mat-icon>
           }
-          <span>{{ product.rating }}/5 ({{ product.reviewCount }} reviews)</span>
+          <span>{{ getProductRating() }}/5 ({{ getReviewCount() }} reviews)</span>
         </div>
 
         <div class="price-section">
@@ -51,10 +53,10 @@
           }
         </div>
 
-        <p class="stock-status" [class.out-of-stock]="product.stock === 0">
-          @if (product.stock > 0) {
+        <p class="stock-status" [class.out-of-stock]="getProductStock() === 0">
+          @if (getProductStock() > 0) {
             <mat-icon>check_circle</mat-icon>
-            In Stock ({{ product.stock }} available)
+            In Stock ({{ getProductStock() }} available)
           } @else {
             <mat-icon>cancel</mat-icon>
             Out of Stock
@@ -68,14 +70,14 @@
               <mat-icon>remove</mat-icon>
             </button>
             <span class="quantity">{{ quantity }}</span>
-            <button mat-icon-button (click)="incrementQuantity()" [disabled]="quantity >= product.stock">
+            <button mat-icon-button (click)="incrementQuantity()" [disabled]="quantity >= getProductStock()">
               <mat-icon>add</mat-icon>
             </button>
           </div>
         </div>
 
         <div class="action-buttons">
-          <button mat-raised-button color="primary" (click)="addToCart()" [disabled]="product.stock === 0" class="add-to-cart-btn">
+          <button mat-raised-button color="primary" (click)="addToCart()" [disabled]="getProductStock() === 0" class="add-to-cart-btn">
             <mat-icon>add_shopping_cart</mat-icon>
             Add to Cart
           </button>
@@ -87,7 +89,7 @@
 
         <p class="seller-info">
           <mat-icon>store</mat-icon>
-          Sold by: {{ product.sellerName || 'Unknown Seller' }}
+          Sold by: {{ product.sellerName || product.seller?.name || 'Unknown Seller' }}
         </p>
       </div>
     </div>
@@ -99,9 +101,9 @@
           <p>{{ product.description }}</p>
         </div>
       </mat-tab>
-      <mat-tab label="Reviews ({{ product.reviewCount }})">
+      <mat-tab label="Reviews ({{ getReviewCount() }})">
         <div class="tab-content">
-          <app-reviews [productId]="product.id"></app-reviews>
+          <app-reviews [productId]="getProductId()"></app-reviews>
         </div>
       </mat-tab>
     </mat-tab-group>

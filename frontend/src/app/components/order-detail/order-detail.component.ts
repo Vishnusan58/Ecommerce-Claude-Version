@@ -12,7 +12,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatStepperModule } from '@angular/material/stepper';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
-import { Order, OrderStatus } from '../../models/order.model';
+import { Order, OrderStatus, OrderItem } from '../../models/order.model';
+import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-order-detail',
@@ -83,7 +84,7 @@ export class OrderDetailComponent implements OnInit {
 
   getStatusIndex(): number {
     if (!this.order) return 0;
-    const index = this.statusSteps.findIndex(s => s.status === this.order!.status);
+    const index = this.statusSteps.findIndex(s => s.status === this.order?.status);
     return index >= 0 ? index : 0;
   }
 
@@ -95,6 +96,11 @@ export class OrderDetailComponent implements OnInit {
   get canRequestRefund(): boolean {
     if (!this.order) return false;
     return this.order.status === 'DELIVERED' && this.order.paymentStatus === 'COMPLETED';
+  }
+
+  getProductId(product: Product | undefined): number {
+    if (!product) return 0;
+    return product.id ?? product.productId ?? 0;
   }
 
   cancelOrder(): void {
@@ -121,7 +127,9 @@ export class OrderDetailComponent implements OnInit {
     this.orderService.requestRefund(this.order.id, 'Customer requested refund').subscribe({
       next: () => {
         this.snackBar.open('Refund request submitted', 'Close', { duration: 3000 });
-        this.loadOrder(this.order!.id);
+        if (this.order) {
+          this.loadOrder(this.order.id);
+        }
       },
       error: (error) => {
         const message = error.error?.message || 'Failed to request refund';
@@ -130,7 +138,9 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
-  viewProduct(productId: number): void {
-    this.router.navigate(['/products', productId]);
+  viewProduct(productId: number | undefined): void {
+    if (productId != null && productId > 0) {
+      this.router.navigate(['/products', productId]);
+    }
   }
 }

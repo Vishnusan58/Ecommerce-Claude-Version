@@ -19,7 +19,7 @@ export interface SubscriptionResponse {
   providedIn: 'root'
 })
 export class ProfileService {
-  private readonly API_URL = '/api/profile';
+  private readonly API_URL = '/api/user/profile';
 
   constructor(private http: HttpClient) {}
 

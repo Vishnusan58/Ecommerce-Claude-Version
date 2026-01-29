@@ -57,11 +57,11 @@
         </mat-card-header>
         <mat-card-content>
           @for (item of order.items; track item.id) {
-            <div class="order-item" (click)="viewProduct(item.product.id)">
-              <img [src]="item.product.imageUrl" [alt]="item.product.name">
+            <div class="order-item" (click)="viewProduct(getProductId(item.product))">
+              <img [src]="item.product?.imageUrl" [alt]="item.product?.name">
               <div class="item-info">
-                <h4>{{ item.product.name }}</h4>
-                <p>{{ item.product.brand }}</p>
+                <h4>{{ item.product?.name }}</h4>
+                <p>{{ item.product?.brand }}</p>
                 <p class="item-qty">Qty: {{ item.quantity }} x ₹{{ item.price | number }}</p>
               </div>
               <div class="item-subtotal">
@@ -109,14 +109,16 @@
             <mat-card-title>Shipping Address</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <p>
-              <strong>{{ order.shippingAddress.fullName }}</strong><br>
-              {{ order.shippingAddress.street }}<br>
-              {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }}<br>
-              {{ order.shippingAddress.zipCode }}, {{ order.shippingAddress.country }}<br>
-              <mat-icon style="font-size: 16px; vertical-align: middle;">phone</mat-icon>
-              {{ order.shippingAddress.phone }}
-            </p>
+            @if (order.shippingAddress) {
+              <p>
+                <strong>{{ order.shippingAddress.fullName }}</strong><br>
+                {{ order.shippingAddress.street }}<br>
+                {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }}<br>
+                {{ order.shippingAddress.zipCode }}, {{ order.shippingAddress.country }}<br>
+                <mat-icon style="font-size: 16px; vertical-align: middle;">phone</mat-icon>
+                {{ order.shippingAddress.phone }}
+              </p>
+            }
           </mat-card-content>
         </mat-card>
 
@@ -165,8 +167,10 @@
                   @if (isCancelling) {
                     <mat-spinner diameter="20"></mat-spinner>
                   } @else {
-                    <mat-icon>cancel</mat-icon>
-                    Cancel Order
+                    <ng-container>
+                      <mat-icon>cancel</mat-icon>
+                      Cancel Order
+                    </ng-container>
                   }
                 </button>
               }

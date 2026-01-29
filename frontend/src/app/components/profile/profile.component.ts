@@ -156,7 +156,13 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  viewProduct(productId: number): void {
-    this.router.navigate(['/products', productId]);
+  getProductId(product: Product): number | undefined {
+    return product?.id ?? product?.productId;
+  }
+
+  viewProduct(productId: number | undefined): void {
+    if (productId != null && productId > 0) {
+      this.router.navigate(['/products', productId]);
+    }
   }
 }

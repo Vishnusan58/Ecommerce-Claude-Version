@@ -38,7 +38,7 @@
           <mat-option value="createdAt,desc">Newest First</mat-option>
           <mat-option value="price,asc">Price: Low to High</mat-option>
           <mat-option value="price,desc">Price: High to Low</mat-option>
-          <mat-option value="rating,desc">Highest Rated</mat-option>
+          <mat-option value="averageRating,desc">Highest Rated</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -53,7 +53,7 @@
   @if (compareList.length > 0) {
     <div class="compare-floating">
       <mat-chip-set>
-        @for (product of compareList; track product.id) {
+        @for (product of compareList; track getProductId(product)) {
           <mat-chip (removed)="removeFromCompare(product)">
             {{ product.name | slice:0:20 }}
             <button matChipRemove>
@@ -85,7 +85,7 @@
       </div>
     } @else {
       <div class="product-grid">
-        @for (product of products; track product.id) {
+        @for (product of products; track getProductId(product)) {
           <mat-card class="product-card" (click)="viewProduct(product)">
             @if (product.premiumEarlyAccess) {
               <div class="premium-badge">Early Access</div>
@@ -97,14 +97,14 @@
             <img mat-card-image [src]="product.imageUrl" [alt]="product.name" class="product-image">
 
             <mat-card-content>
-              <p class="product-category">{{ product.category.name }}</p>
+              <p class="product-category">{{ getProductCategory(product) }}</p>
               <h3 class="product-name">{{ product.name }}</h3>
 
               <div class="rating">
                 @for (star of [1,2,3,4,5]; track star) {
-                  <mat-icon>{{ star <= product.rating ? 'star' : 'star_border' }}</mat-icon>
+                  <mat-icon>{{ star <= getProductRating(product) ? 'star' : 'star_border' }}</mat-icon>
                 }
-                <span>({{ product.reviewCount }})</span>
+                <span>({{ getReviewCount(product) }})</span>
               </div>
 
               <div class="price-section">
@@ -116,14 +116,14 @@
             </mat-card-content>
 
             <mat-card-actions>
-              <button mat-raised-button color="primary" (click)="addToCart(product, $event)" [disabled]="product.stock === 0">
+              <button mat-raised-button color="primary" (click)="addToCart(product, $event)" [disabled]="getProductStock(product) === 0">
                 <mat-icon>add_shopping_cart</mat-icon>
-                {{ product.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+                {{ getProductStock(product) === 0 ? 'Out of Stock' : 'Add to Cart' }}
               </button>
-              <button mat-icon-button (click)="toggleWishlist(product, $event)" [color]="isInWishlist(product.id) ? 'warn' : ''">
-                <mat-icon>{{ isInWishlist(product.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
+              <button mat-icon-button (click)="toggleWishlist(product, $event)" [color]="isInWishlist(getProductId(product)) ? 'warn' : ''">
+                <mat-icon>{{ isInWishlist(getProductId(product)) ? 'favorite' : 'favorite_border' }}</mat-icon>
               </button>
-              <button mat-icon-button (click)="toggleCompare(product, $event)" [color]="isInCompare(product.id) ? 'primary' : ''">
+              <button mat-icon-button (click)="toggleCompare(product, $event)" [color]="isInCompare(getProductId(product)) ? 'primary' : ''">
                 <mat-icon>compare_arrows</mat-icon>
               </button>
             </mat-card-actions>

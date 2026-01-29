@@ -73,14 +73,12 @@ export class RegisterComponent {
     const { name, email, password, role } = this.registerForm.value;
 
     this.authService.register({ name, email, password, role }).subscribe({
-      next: (response) => {
-        this.snackBar.open(response.message || 'Registration successful!', 'Close', {
-          duration: 5000,
+      next: () => {
+        this.snackBar.open('Registration successful!', 'Close', {
+          duration: 3000,
           panelClass: ['success-snackbar']
         });
-        this.router.navigate(['/login'], {
-          queryParams: { message: 'Registration successful! Please login.' }
-        });
+        this.router.navigate(['/products']);
       },
       error: (error) => {
         this.isLoading = false;

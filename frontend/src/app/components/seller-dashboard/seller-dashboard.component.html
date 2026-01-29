@@ -65,17 +65,17 @@
           </div>
         } @else {
           <div class="products-table">
-            @for (product of products; track product.id) {
+            @for (product of products; track getProductId(product)) {
               <mat-card class="product-row">
                 <img [src]="product.imageUrl" [alt]="product.name">
                 <div class="product-info">
                   <h4>{{ product.name }}</h4>
-                  <p>{{ product.category.name }} | {{ product.brand }}</p>
+                  <p>{{ getProductCategory(product) }} | {{ product.brand ?? 'N/A' }}</p>
                 </div>
                 <div class="product-price">
                   <span class="price">₹{{ product.price | number }}</span>
-                  <span class="stock" [class.low]="product.stock < 10">
-                    {{ product.stock }} in stock
+                  <span class="stock" [class.low]="getProductStock(product) < 10">
+                    {{ getProductStock(product) }} in stock
                   </span>
                 </div>
                 <div class="product-actions">
@@ -130,7 +130,7 @@
                   <span class="order-date">{{ order.createdAt | date:'short' }}</span>
                 </div>
                 <div class="order-items">
-                  {{ order.items.length }} item(s)
+                  {{ order.items?.length ?? 0 }} item(s)
                   @if (order.isPremiumOrder) {
                     <mat-chip class="premium-chip">
                       <mat-icon>star</mat-icon>

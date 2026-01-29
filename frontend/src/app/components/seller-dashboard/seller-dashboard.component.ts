@@ -119,6 +119,18 @@ export class SellerDashboardComponent implements OnInit {
     });
   }
 
+  getProductId(product: Product): number {
+    return product.id ?? product.productId ?? 0;
+  }
+
+  getProductStock(product: Product): number {
+    return product.stock ?? product.stockQuantity ?? 0;
+  }
+
+  getProductCategory(product: Product): string {
+    return product.category?.name ?? 'Uncategorized';
+  }
+
   onProductsPageChange(event: PageEvent): void {
     this.productsPageIndex = event.pageIndex;
     this.productsPageSize = event.pageSize;
@@ -148,8 +160,11 @@ export class SellerDashboardComponent implements OnInit {
   }
 
   deleteProduct(product: Product): void {
+    const productId = this.getProductId(product);
+    if (!productId) return;
+
     if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      this.sellerService.deleteProduct(product.id).subscribe({
+      this.sellerService.deleteProduct(productId).subscribe({
         next: () => {
           this.loadProducts();
           this.loadStats();
@@ -174,7 +189,9 @@ export class SellerDashboardComponent implements OnInit {
     });
   }
 
-  viewOrder(orderId: number): void {
-    this.router.navigate(['/orders', orderId]);
+  viewOrder(orderId: number | undefined): void {
+    if (orderId != null) {
+      this.router.navigate(['/orders', orderId]);
+    }
   }
 }

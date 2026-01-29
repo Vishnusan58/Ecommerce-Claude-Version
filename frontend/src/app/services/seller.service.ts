@@ -34,7 +34,7 @@ export class SellerService {
   constructor(private http: HttpClient) {}
 
   getSellerStats(): Observable<SellerStats> {
-    return this.http.get<SellerStats>(`${this.API_URL}/stats`);
+    return this.http.get<SellerStats>(`${this.API_URL}/dashboard`);
   }
 
   getSellerProducts(page: number = 0, size: number = 10): Observable<PageResponse<Product>> {

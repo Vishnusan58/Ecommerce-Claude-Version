@@ -16,7 +16,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
-import { Cart } from '../../models/cart.model';
+import { Cart, CartItem } from '../../models/cart.model';
 import { CreateOrderRequest, PaymentMethod } from '../../models/order.model';
 
 @Component({
@@ -175,5 +175,39 @@ export class CheckoutComponent implements OnInit {
 
   get isPremium(): boolean {
     return this.authService.isPremium();
+  }
+
+  // Helper methods for cart item field access
+  getItemId(item: CartItem): number {
+    return item.id ?? item.cartItemId ?? 0;
+  }
+
+  getItemName(item: CartItem): string {
+    return item.product?.name ?? item.productName ?? 'Unknown';
+  }
+
+  getItemImage(item: CartItem): string {
+    return item.product?.imageUrl ?? item.imageUrl ?? '';
+  }
+
+  // Helper methods for cart totals
+  getCartSubtotal(): number {
+    return this.cart?.subtotal ?? this.cart?.totalAmount ?? 0;
+  }
+
+  getCartTax(): number {
+    return this.cart?.tax ?? 0;
+  }
+
+  getCartDeliveryFee(): number {
+    return this.cart?.deliveryFee ?? 0;
+  }
+
+  getCartDiscount(): number {
+    return this.cart?.discount ?? this.cart?.discountAmount ?? 0;
+  }
+
+  getCartTotal(): number {
+    return this.cart?.total ?? this.cart?.finalAmount ?? 0;
   }
 }
