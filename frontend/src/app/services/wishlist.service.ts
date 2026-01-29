@@ -21,19 +21,22 @@ export class WishlistService {
   getWishlist(): Observable<Product[]> {
     return this.http.get<WishlistResponse>(this.API_URL).pipe(
       map(response => {
-        const products = response.items.map((item: any) => ({
+        const products: Product[] = response.items.map((item: any) => ({
           id: item.productId,
           productId: item.productId,
-          name: item.productName,
-          description: item.description,
-          price: item.price,
+          name: item.productName || '',
+          description: item.description || '',
+          price: item.price || 0,
           originalPrice: item.originalPrice,
           averageRating: item.rating,
           rating: item.rating,
-          imageUrl: item.imageUrl,
+          imageUrl: item.imageUrl || '',
           stockQuantity: item.stockQuantity,
           stock: item.stockQuantity,
-          category: item.categoryName ? { name: item.categoryName } : null,
+          category: item.categoryName ? {
+            id: 0,
+            name: item.categoryName
+          } : undefined,
           discountPercent: item.discountPercent,
           premiumEarlyAccess: item.premiumEarlyAccess
         }));
